@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Let there be Water</title>
+<style>
+  body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(135deg,#e0f2fe,#f0fdf4 50%,#e0f2fe);color:#0f172a}
+  .card{background:#fff;border-radius:24px;box-shadow:0 20px 40px rgba(2,132,199,.15);max-width:380px;width:calc(100% - 32px);padding:28px 24px;text-align:center}
+  .drop{font-size:48px}
+  h1{font-size:22px;margin:8px 0 6px}
+  p{font-size:14px;color:#475569;line-height:1.45;margin:8px 0}
+  .btn{display:block;width:100%;box-sizing:border-box;margin-top:14px;padding:14px;border:0;border-radius:16px;background:linear-gradient(90deg,#00b4d8,#14b8a6);color:#fff;font-weight:800;font-size:16px;text-decoration:none;cursor:pointer}
+  .btn2{display:block;width:100%;box-sizing:border-box;margin-top:10px;padding:12px;border:0;border-radius:16px;background:#e0f2fe;color:#0369a1;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer}
+  .small{font-size:12px;color:#64748b}
+  .err{color:#e11d48;font-weight:700}
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="drop">&#x1F4A7;</div>
+  <h1>Let there be Water</h1>
+  <p id="msg">You were invited to your dorm's water rotation.</p>
+
+  <a id="open" class="btn hidden" href="#">Open in the app</a>
+  <button id="copy" class="btn2 hidden" type="button">Copy invite code</button>
+  <a id="scheme" class="btn2 hidden" href="#">Try the other way to open</a>
+  <a id="apk" class="btn2 hidden" href="#">Download the app (APK)</a>
+
+  <p class="small" id="help"></p>
+</div>
+
+<script>
+  // Optional: paste a direct download link to your APK here (Google Drive, GitHub release, etc.).
+  var APK_URL = "";
+  var PACKAGE = "com.dorm.water";
+
+  var token = (location.hash || "").replace(/^#/, "").replace(/^LTBW1:/, "");
+  var $ = function (id) { return document.getElementById(id); };
+  var isAndroid = /Android/i.test(navigator.userAgent);
+
+  if (!/^[A-Za-z0-9_-]{8,2000}$/.test(token)) {
+    $("msg").innerHTML = '<span class="err">This invite link looks incomplete.</span> Ask your roommate to send it again.';
+  } else {
+    var intentUrl = "intent://join?d=" + token + "#Intent;scheme=letthere;package=" + PACKAGE + ";end";
+    var schemeUrl = "letthere://join?d=" + token;
+
+    if (!isAndroid) {
+      $("msg").textContent = "Open this link on your Android phone, where the app is installed.";
+    } else {
+      $("open").href = intentUrl;
+      $("scheme").href = schemeUrl;
+      $("open").classList.remove("hidden");
+      $("scheme").classList.remove("hidden");
+      $("copy").classList.remove("hidden");
+      if (APK_URL) { $("apk").href = APK_URL; $("apk").classList.remove("hidden"); }
+      $("help").textContent = "App doesn't open? Tap Copy invite code, then open Let there be Water yourself. The join form fills itself in. Inside Telegram you can also use the menu and choose Open in Chrome.";
+      // try once automatically, the buttons are the fallback
+      setTimeout(function () { window.location.href = intentUrl; }, 500);
+    }
+
+    $("copy").addEventListener("click", function () {
+      var text = "LTBW1:" + token;
+      var done = function () { $("copy").textContent = "Copied! Now open the app"; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(legacy);
+      } else { legacy(); }
+      function legacy() {
+        var t = document.createElement("textarea");
+        t.value = text; document.body.appendChild(t); t.select();
+        try { document.execCommand("copy"); done(); } catch (e) {}
+        document.body.removeChild(t);
+      }
+    });
+  }
+</script>
+</body>
+</html>
